@@ -360,25 +360,54 @@ class Carriage:
         self.front = CarriageNode(line_occupied, fractional_position)
         self.back =  CarriageNode(line_occupied, fractional_position)
 
-junctions = [[]]*4
-lines = [[]]*8
+#########################################################
 
-# Main Line
-lines[0] = Line(nodes=[Node(0,0),Node(1,0.5),Node(2,1),Node(3,0.5),Node(4,0),Node(5,0)])
-lines[1] = Line(nodes=[Node(5,0),Node(15,0)])
-lines[5] = Line(nodes=[Node(15,0),Node(20,0)])
-lines[6] = Line(nodes=[Node(7,2),Node(13,2),Node(15,0)])
-# Branch Line
-lines[2] = Line(nodes=[Node(5,0),Node(7,2)])
-lines[7] = Line(nodes=[Node(7,2),Node(9,4)])
-lines[3] = Line(nodes=[Node(20,4),Node(9,4)])
-lines[4] = Line(nodes=[Node(9,4),Node(11,6),Node(20,6)])
+import json
 
-# Junctions
-junctions[0] = Standard_Points(Node(5,0), start_line=lines[0], main_line=lines[1], branch_line=lines[2]) # First set of points
-junctions[1] = Standard_Points(Node(9,4), start_line=lines[7], main_line=lines[4], branch_line=lines[3]) # Second set of points on branch line
-junctions[2] = Standard_Points(Node(7,2), start_line=lines[2], main_line=lines[7], branch_line=lines[6])
-junctions[3] = Standard_Points(Node(15,0), start_line=lines[5], main_line=lines[1], branch_line=lines[6])
+junctions = {}
+lines = {}
+
+with open("sample_line.json") as file:
+    data = json.load(file)
+    lines_data = data["lines"]
+    junctions_data = data["junctions"]
+
+    for line_name, line in lines_data.items():
+        nodes = [Node(node[0],node[1]) for node in line["nodes"]]
+        lines[line_name] = Line(nodes=nodes)
+
+    for junction_name, junction in junctions_data.items():
+        if junction["type"] == "StandardPoints":
+            position = Node(junction["position"][0], junction["position"][1])
+            start_line  = lines[junction["startline"]]
+            main_line   = lines[junction["mainline"]]
+            branch_line = lines[junction["branchline"]]
+            junctions[junction_name] = Standard_Points(position, start_line=start_line, main_line=main_line, branch_line=branch_line)
+        elif junction["type"] == "Idontknowthisone":
+            pass
+        else:
+            raise ValueError(f"Unrecognised junction type {junction['type']} for junction {junction_name}.")
+
+
+# junctions = [[]]*4
+# lines = [[]]*8
+#
+# # Main Line
+# lines[0] = Line(nodes=[Node(0,0),Node(1,0.5),Node(2,1),Node(3,0.5),Node(4,0),Node(5,0)])
+# lines[1] = Line(nodes=[Node(5,0),Node(15,0)])
+# lines[5] = Line(nodes=[Node(15,0),Node(20,0)])
+# lines[6] = Line(nodes=[Node(7,2),Node(13,2),Node(15,0)])
+# # Branch Line
+# lines[2] = Line(nodes=[Node(5,0),Node(7,2)])
+# lines[7] = Line(nodes=[Node(7,2),Node(9,4)])
+# lines[3] = Line(nodes=[Node(20,4),Node(9,4)])
+# lines[4] = Line(nodes=[Node(9,4),Node(11,6),Node(20,6)])
+#
+# # Junctions
+# junctions[0] = Standard_Points(Node(5,0), start_line=lines[0], main_line=lines[1], branch_line=lines[2]) # First set of points
+# junctions[1] = Standard_Points(Node(9,4), start_line=lines[7], main_line=lines[4], branch_line=lines[3]) # Second set of points on branch line
+# junctions[2] = Standard_Points(Node(7,2), start_line=lines[2], main_line=lines[7], branch_line=lines[6])
+# junctions[3] = Standard_Points(Node(15,0), start_line=lines[5], main_line=lines[1], branch_line=lines[6])
 
 window = tk.Tk()
 canvas = tk.Canvas(window, width=900, height=800)
@@ -389,7 +418,7 @@ offset = 20
 dot_radius = 5
 
 # Draw lines
-for line in lines:
+for line in lines.values():
     for i in range(len(line.nodes)-1):
         start = line.nodes[i]
         end = line.nodes[i+1]
@@ -401,7 +430,7 @@ for line in lines:
 def switch_point_callback(event):
     junction_oval = event.widget.find_withtag('current')[0]
     junction = None
-    for j in junctions:
+    for j in junctions.values():
         if j.oval == junction_oval:
             junction = j
             break
@@ -414,7 +443,7 @@ def switch_point_callback(event):
     junction.switch()
 
 # Draw junctions
-for junction in junctions:
+for junction in junctions.values():
     pos = junction.position
     x1, y1 = pos.x*scale, pos.y*scale
     junction.oval = canvas.create_oval(x1+offset-dot_radius,y1+offset-dot_radius,x1+offset+dot_radius,y1+offset+dot_radius,fill="blue")
@@ -445,14 +474,11 @@ def drawtrain_tmpfunction(train):
         carriage.line = canvas.create_line(x1+offset,y1+offset,x2+offset,y2+offset, fill="red")
 
 ## Simulation ##
-maintrain = Train.from_carriage_data(line=lines[0], fractional_position=0.1, carriage_data=[1,2,1])
-train2 = Train.from_carriage_data(line=lines[4], fractional_position=0.9, carriage_data=[1,1,1])
+maintrain = Train.from_carriage_data(line=lines["Mainline-A"], fractional_position=0.1, carriage_data=[1,2,1])
+train2 = Train.from_carriage_data(line=lines["Siding-3A"], fractional_position=0.9, carriage_data=[1,1,1])
 maintrain.velocity = 0.05 # Velocity steps must be shorter than the shortest line segment
 # Also, there must be no bends of more that 90 degrees within the length of the longest carriage (or carriage following will have unexpected behaviour)
 # Also, trains should not be spawned within the length of its longest carriage of a junction (train still continues, but there is a graphics & position glitch while crossing the junction)
-
-junctions[0].direction = MAINLINE
-junctions[1].direction = MAINLINE
 
 
 keys_down = {}
