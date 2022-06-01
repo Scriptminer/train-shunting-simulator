@@ -16,7 +16,7 @@ public class SetupLayout : MonoBehaviour
     [SerializeField] private GameObject junctionPrefab;
     [SerializeField] private TextAsset layoutFile;
 
-    [SerializeField]
+    //[SerializeField]
 
     [SerializeField] private GameObject CN; // TEMPORARY
 
@@ -47,9 +47,9 @@ public class SetupLayout : MonoBehaviour
         LoadLines();
         LoadJunctions();
         CN.GetComponent<CarriageNode>().Setup(lines["line0"],0.1f);
-        GameObject clone = Instantiate(linePrefab, new Vector3(0,0,0), Quaternion.identity);
+        /*GameObject clone = Instantiate(linePrefab, new Vector3(0,0,0), Quaternion.identity);
         lines[linename] = clone.GetComponent<LineController>();
-        lines[linename].SetupLine(nodes.ToArray());
+        lines[linename].SetupLine(nodes.ToArray());*/
     }
 
     private void LoadLines()
