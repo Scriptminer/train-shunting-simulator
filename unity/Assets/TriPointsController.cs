@@ -25,10 +25,12 @@ public class TriPointsController : JunctionController
         connectLine(startline);
         connectLine(mainline);
         connectLine(branchline);
-
+        
+        gameObject.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
     }
 
-    public LineController nextLine(LineController fromline) {
+    new public LineController nextLine(LineController fromline) {
+        Debug.Log("I WAS CALLED!");
         if(fromline == startline){
             if(direction) { return mainline; }
             else          { return branchline; }
@@ -37,14 +39,19 @@ public class TriPointsController : JunctionController
             else          { return null; } // Train can't go this way
         }else if(fromline == branchline){
             if(direction) { return null; } // Train can't go this way
-            else          { return mainline; }
+            else          { return startline; }
         }else{ // fromline is not connected to this junction
             return null;
             //throw new Exception("Specified fromline "+ fromline +" is not a connection of this junction.");
         }
     }
 
-    public void switchLine() {
+    public void SwitchLine() {
         direction = !direction;
+        if (direction) {
+            gameObject.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+        }else {
+            gameObject.GetComponent<Renderer>().material.color = new Color(0, 255, 255);
+        }
     }
 }

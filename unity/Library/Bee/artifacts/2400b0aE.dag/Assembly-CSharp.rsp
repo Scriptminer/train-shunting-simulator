@@ -343,9 +343,11 @@
 -r:"Library/Bee/artifacts/2400b0aE.dag/UnityEditor.UI.ref.dll"
 -r:"Library/Bee/artifacts/2400b0aE.dag/UnityEngine.UI.ref.dll"
 "Assets/BufferController.cs"
+"Assets/CameraHandler.cs"
+"Assets/CarriageNode.cs"
 "Assets/JunctionController.cs"
 "Assets/LineController.cs"
-"Assets/LineGeneratorTest.cs"
+"Assets/SetupLayout.cs"
 "Assets/TriPointsController.cs"
 -langversion:9.0
 

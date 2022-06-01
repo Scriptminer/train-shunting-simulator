@@ -10,7 +10,7 @@ public class LineController : MonoBehaviour
 
     private LineRenderer lr;
     private Vector2[] nodes;
-    private float length;
+    public float length;
     private float[] segmentLengths;
     private float[] fractionalSegmentLengths;
 
@@ -80,7 +80,7 @@ public class LineController : MonoBehaviour
         fractionalSegmentLengths = segmentLengths.Select(n => n/length).ToArray();
     }
 
-    public Vector2 interpolate_position(float fractionalPosition) {
+    public Vector2 InterpolatePosition(float fractionalPosition) {
         if(fractionalPosition < 0 || fractionalPosition > 1){
             throw new Exception("Line cannot interpolate fractional position outwith range 0-1.");
         }
@@ -91,7 +91,7 @@ public class LineController : MonoBehaviour
                 Vector2 node = nodes[i];
                 Vector2 nextNode = nodes[i+1];
                 float sectionPosition = (fractionalPosition - lengthSoFar) / fractionalSegmentLengths[i];
-                return (nextNode - node)*sectionPosition;
+                return node + (nextNode - node)*sectionPosition;
             }
             lengthSoFar += fractionalSegmentLengths[i];
         }
@@ -99,8 +99,8 @@ public class LineController : MonoBehaviour
         throw new Exception("Interpolation of fractional position failed.");
     }
 
-    public List<float> intersectsCircle(float circleCentre, float circleRadius) {
-        List<float> intersectionPoints; // Under normal circumstances will only contain 0, 1 or 2 elements
+    public List<float> IntersectsCircle(Vector2 circleCentre, float circleRadius) {
+        List<float> intersectionPoints = new List<float>(); // Under normal circumstances will only contain 0, 1 or 2 elements
         float lengthSoFar = 0;
 
         for(int i=0; i<(nodes.Length-1); i++) {
@@ -125,10 +125,42 @@ public class LineController : MonoBehaviour
 
             float A = dx*dx + dy*dy;
             float B = 2*x1*dx - 2*dx*cx + 2*y1*dy - 2*dy*cy;
-            float C = x1*x1 - 2*cx*x1 + cx*cx + y1**2 - 2*cy*y1 + cy*cy - r*r;
+            float C = x1*x1 - 2*cx*x1 + cx*cx + y1*y1 - 2*cy*y1 + cy*cy - r*r;
 
             // Implementation of quadratic formula:
-            float discriminant = B**2 - 4*A*C
+            float discriminant = B*B - 4*A*C;
+
+            if (discriminant >= 0){
+                float rootDiscriminant = (float) Math.Sqrt(discriminant);
+                float f_plus = (-B + rootDiscriminant) / (2*A);
+                float f_minus = (-B - rootDiscriminant) / (2*A);
+                // Add only those points which lie on a line segment
+                if (f_plus >= 0 && f_plus <= 1){
+                    // Convert f position on segment to position on line
+                    float linePosition = (f_plus*segmentLength) + lengthSoFar;
+                    intersectionPoints.Add(linePosition);
+                }
+                if (f_minus >= 0 && f_minus <= 1){
+                    // Convert f position on segment to position on line
+                    float linePosition = (f_minus*segmentLength) + lengthSoFar;
+                    intersectionPoints.Add(linePosition);
+                }
+            }
+            lengthSoFar += segmentLength;
         }
+
+        // Remove any points which are (very close to) identical
+        intersectionPoints.Sort();
+        List<float> finalIntersectionPoints = new List<float>();
+        for (int i=0; i<(intersectionPoints.Count - 1); i++){
+            float prev_point = intersectionPoints[i];
+            float point = intersectionPoints[i+1];
+            if (Math.Abs(prev_point - point) > 0.0000001){
+                // Only keep instances of prev_point when they are not almost identical to point
+                finalIntersectionPoints.Add(intersectionPoints[i]);
+            }
+        }
+
+        return finalIntersectionPoints;
     }
 }
