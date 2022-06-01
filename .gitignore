@@ -1,0 +1,4 @@
+unity/Library/
+unity/Temp/
+unity/Logs/
+**/__pycache__/
