@@ -116,7 +116,7 @@
 -define:ROSLYN_ANALYZER_FIX
 -define:CSHARP_7_OR_LATER
 -define:CSHARP_7_3_OR_NEWER
--r:"/data/home/aidan/Desktop/code/unity/Train-Simulator2/Library/PackageCache/com.unity.ext.nunit@1.0.6/net35/unity-custom/nunit.framework.dll"
+-r:"/data/home/aidan/Desktop/code/train-simulator/unity/Library/PackageCache/com.unity.ext.nunit@1.0.6/net35/unity-custom/nunit.framework.dll"
 -r:"/data/home/aidan/Unity/Hub/Editor/2021.3.0f1/Editor/Data/Managed/UnityEditor.Graphs.dll"
 -r:"/data/home/aidan/Unity/Hub/Editor/2021.3.0f1/Editor/Data/Managed/UnityEngine/UnityEditor.CoreModule.dll"
 -r:"/data/home/aidan/Unity/Hub/Editor/2021.3.0f1/Editor/Data/Managed/UnityEngine/UnityEditor.DeviceSimulatorModule.dll"

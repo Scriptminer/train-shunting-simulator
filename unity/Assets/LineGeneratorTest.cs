@@ -12,8 +12,6 @@ public class TrackLayout
 
 public class LineGeneratorTest : MonoBehaviour
 {
-    [SerializeField] private LineController mainLineThing;
-
     [SerializeField] private GameObject linePrefab;
     [SerializeField] private GameObject junctionPrefab;
 
@@ -33,7 +31,8 @@ public class LineGeneratorTest : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("Information on J2: "+ junctions["J2"]);
+        //Debug.Log("Information on J2: "+ junctions["J2"]);
+        //Debug.Log(junctions);
     }
 
     // Start is called before the first frame update
@@ -45,7 +44,6 @@ public class LineGeneratorTest : MonoBehaviour
 
     private void LoadLines()
     {
-        int count = 0;
         foreach(var (linename, line) in layoutData.lines){
             List<Vector2> nodes = new List<Vector2>();
             foreach(object node_data in line["nodes"] as IEnumerable){
@@ -56,7 +54,7 @@ public class LineGeneratorTest : MonoBehaviour
                     i++;
                 }
                 Vector2 node = new Vector2(node_coords[0], node_coords[1]);
-                nodes.Add(Vector2.Scale(node, new Vector2(0.8f, -0.8f)) + new Vector2(-8f,4f));
+                nodes.Add(node);
             }
             GameObject clone = Instantiate(linePrefab, new Vector3(0,0,0), Quaternion.identity);
             lines[linename] = clone.GetComponent<LineController>();
@@ -74,9 +72,8 @@ public class LineGeneratorTest : MonoBehaviour
                 junction_coords[i] = float.Parse(term.ToString());
                 i++;
             }
-            Debug.Log("Setting up junction: "+junction_name);
+            
             Vector2 junction_pos = new Vector2(junction_coords[0], junction_coords[1]);
-            junction_pos = Vector2.Scale(junction_pos, new Vector2(0.8f, -0.8f)) + new Vector2(-8f,4f);
 
             if((string) junction["type"] == "StandardPoints"){
                 LineController startline = lines[(string) junction["startline"]];
@@ -84,8 +81,8 @@ public class LineGeneratorTest : MonoBehaviour
                 LineController branchline = lines[(string) junction["branchline"]];
 
                 GameObject junction_clone = Instantiate(junctionPrefab, new Vector3(0,0,0), Quaternion.identity);
-                junctions[junction_name] = junction_clone.GetComponent<JunctionController>();
-                junctions[junction_name].Setup(junction_pos,startline,mainline,branchline);
+                junctions[junction_name] = junction_clone.GetComponent<TriPointsController>();
+                ((TriPointsController) junctions[junction_name]).Setup(junction_pos,startline,mainline,branchline);
             }else{
                 //throw new NotImplementedException("Junction type "+ junction["type"] +" is not implemented.");
             }
