@@ -82,7 +82,8 @@ public class LineController : MonoBehaviour
 
     public Vector2 InterpolatePosition(float fractionalPosition) {
         if(fractionalPosition < 0 || fractionalPosition > 1){
-            throw new Exception("Line cannot interpolate fractional position outwith range 0-1.");
+            //throw new Exception("Line cannot interpolate fractional position outwith range 0-1. Fractional Position is: "+fractionalPosition+".");
+            return new Vector2(-10000000,-1000000);
         }
 
         float lengthSoFar = 0;
@@ -155,12 +156,14 @@ public class LineController : MonoBehaviour
         for (int i=0; i<(intersectionPoints.Count - 1); i++){
             float prev_point = intersectionPoints[i];
             float point = intersectionPoints[i+1];
-            if (Math.Abs(prev_point - point) > 0.0000001){
+            if (Math.Abs(prev_point - point) > 0.0000001f){
                 // Only keep instances of prev_point when they are not almost identical to point
                 finalIntersectionPoints.Add(intersectionPoints[i]);
             }
         }
-
+        if (intersectionPoints.Count > 0){
+            finalIntersectionPoints.Add(intersectionPoints[intersectionPoints.Count-1]);
+        }
         return finalIntersectionPoints;
     }
 }

@@ -8,55 +8,55 @@ class State():
         self.fractional_position = fractional_position
         self.line_occupied = line_occupied
         self.direction = direction
-    
+
     def as_dict(self):
         return {"fractional_position":self.fractional_position, "line_occupied":self.line_occupied, "direction":self.direction} # Position one step prior to current step
-    
+
     @classmethod
     def from_dict(cls, state_dict):
         return cls(state_dict["fractional_position"], state_dict["line_occupied"], state_dict["direction"])
-    
+
     @classmethod
     def from_carriage_node(cls, node):
         return cls(node.fractional_position, node.line_occupied, node.direction)
-    
+
     def __str__(self):
         return f"{self.fractional_position} on line {self.line_occupied}, Direction: {self.direction}"
-    
+
 class Carriage_Node():
     def __init__(self, line_occupied, fractional_position=0):
         self.line_occupied = line_occupied
         self.fractional_position = fractional_position
         self.direction = 1 # 1 if the line segment is start - finish ()
         self.is_ends_node = False # Whether this node is a node at either end of the train. Set to True on train construction
-        
+
         self.save_state()
-    
+
     def save_state(self):
         self.previous_state = State.from_carriage_node(self)
-        
+
     def get_state(self):
         return State.from_carriage_node(self).as_dict()
-    
+
     def get_previous_state(self):
         return self.previous_state.as_dict()
-    
+
     def undo_step(self):
         self.fractional_position = self.previous_state.fractional_position
         self.line_occupied = self.previous_state.line_occupied
         self.direction = self.previous_state.direction
-    
+
     def step(self, velocity, save=False):
         """ Move forward a fixed distance. Returns True on any movement. """
         # Error codes: 0 - success, 1 - failure
         if save:
             self.save_state()
-        
+
         velocity *= self.direction # The velocity in the direction in which the train is treating this segment of track
         line_length = self.line_occupied.length
         fractional_change = velocity / line_length
         new_fractional_position = self.fractional_position + fractional_change
-        
+
         if new_fractional_position >= 0 and new_fractional_position <= 1:
             # Staying on same line
             self.fractional_position = new_fractional_position
@@ -70,7 +70,7 @@ class Carriage_Node():
                 #print(f"Hit end junction {str(self.line_occupied.end_junction)}")
                 junction = self.line_occupied.end_junction
                 overshoot = new_fractional_position - 1
-            
+
         # Switch onto new track:
         if type(junction) != Standard_Points:
             return 1 # Train terminates
@@ -78,7 +78,7 @@ class Carriage_Node():
         nextline = junction.next(self.line_occupied)
         if nextline == None: # Train can't go this way!
             return 1
-            
+
         print(f"Node at {self.get_location()} steps over junction {junction}. Velocity is currently {velocity} and direction is {self.direction}")
         if self.is_ends_node:
             junction.toggle_occupied()
@@ -159,7 +159,7 @@ class Carriage_Node():
         else:
             raise SystemError(f"More than 1 position available to move following node at {self.get_location()}: {candidate_positions}")
         return 0
-        
+
     def move_to(self, ahead_carriage_node):
         self.line_occupied = ahead_carriage_node.line_occupied
         self.fractional_position = ahead_carriage_node.fractional_position
@@ -169,7 +169,7 @@ class Carriage_Node():
         """ Interpolate position of node """
         position = self.line_occupied.interpolate_position(self.fractional_position)
         return position
-    
+
     def get_location(self):
         """ Display position of node """
         return f"{self.get_position()} on line {self.line_occupied}"

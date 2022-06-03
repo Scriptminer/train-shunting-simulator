@@ -25,12 +25,11 @@ public class TriPointsController : JunctionController
         connectLine(startline);
         connectLine(mainline);
         connectLine(branchline);
-        
+
         gameObject.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
     }
 
     new public LineController nextLine(LineController fromline) {
-        Debug.Log("I WAS CALLED!");
         if(fromline == startline){
             if(direction) { return mainline; }
             else          { return branchline; }

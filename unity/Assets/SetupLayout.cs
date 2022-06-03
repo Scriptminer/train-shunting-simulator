@@ -19,6 +19,7 @@ public class SetupLayout : MonoBehaviour
     //[SerializeField]
 
     [SerializeField] private GameObject CN; // TEMPORARY
+    [SerializeField] private GameObject CNF; // TEMPORARY
 
 
     private TrackLayout layoutData;
@@ -46,7 +47,9 @@ public class SetupLayout : MonoBehaviour
     {
         LoadLines();
         LoadJunctions();
-        CN.GetComponent<CarriageNode>().Setup(lines["line0"],0.1f);
+        CarriageNode cn = CN.GetComponent<CarriageNode>();
+        cn.Setup(lines["line0"],0.1f,null);
+        CNF.GetComponent<CarriageNode>().Setup(lines["line0"],0.1f,cn);
         /*GameObject clone = Instantiate(linePrefab, new Vector3(0,0,0), Quaternion.identity);
         lines[linename] = clone.GetComponent<LineController>();
         lines[linename].SetupLine(nodes.ToArray());*/

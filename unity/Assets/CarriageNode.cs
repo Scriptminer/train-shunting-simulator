@@ -24,11 +24,14 @@ public class CarriageNode : MonoBehaviour
 
     private State previousState;
 
-    public void Setup(LineController lineOccupied, float fractionalPosition){
+    private CarriageNode toFollow; // Temporary
+
+    public void Setup(LineController lineOccupied, float fractionalPosition, CarriageNode tf){
         this.lineOccupied = lineOccupied;
         this.fractionalPosition = fractionalPosition;
         this.direction = 1; // 1 if the node is traversing segment start -> finish, else -1 or 0
         this.isEndsNode = false;
+        this.toFollow = tf; // Temporary
     }
 
     void SaveState(){
@@ -69,7 +72,8 @@ public class CarriageNode : MonoBehaviour
 
         // Switch onto new track:
         if ( !(junction is TriPointsController)){
-            Debug.Log("Hit unhandled junction type, stopping.");
+            Debug.Log("Hit unhandled junction type, stopping. Junction type is: ");
+            Debug.Log(junction);
             return 1; // Unhandled junction type, train terminates
         }
 
@@ -130,10 +134,10 @@ public class CarriageNode : MonoBehaviour
                     if (! aheadOf(intersection, aheadCarriageNode.fractionalPosition,trainVelocity)){
                         candidatePositions.Add(intersection);
                     }
+                } else {
+                    // Not on the same lines, so relative fractionalPositions don't matter
+                    candidatePositions.Add(intersection);
                 }
-            }else {
-                // Not on the same lines, so relative fractionalPositions don't matter
-                candidatePositions.Add(intersection); // In working Python code, I don't know why. But it works.
             }
         }
 
@@ -153,11 +157,13 @@ public class CarriageNode : MonoBehaviour
                     fractionalPosition = -0.0001f;
                 }
                 LineController initialLineOccupied = lineOccupied;
-                Step(0); // Stepping will now switch this node onto the next line
+                //Step(0); // Stepping will now switch this node onto the next line
+                Step(0);
                 if (lineOccupied == initialLineOccupied){
                     throw new Exception("No valid position for following node at "+this);
                 }else {
                     // Try following aheadCarriageNode, now this node is on the next line
+                    Debug.Log("Attempting recursive follow!");
                     Follow(aheadCarriageNode, carriageLength, relativeTrainVelocity);
                 }
             }
@@ -202,7 +208,11 @@ public class CarriageNode : MonoBehaviour
     void Update()
     {
         float x = Input.GetAxis("Horizontal");
-        Step(x*0.1f);
+        if (toFollow == null){
+            Step(x*0.1f);
+        }else {
+            Follow(toFollow,2,x*0.1f);
+        }
         Vector2 pos = GetPosition();
         gameObject.transform.position = new Vector3(pos.x,pos.y,1);
     }
