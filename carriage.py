@@ -5,14 +5,14 @@ class Carriage:
         self.length = length
         self.type = type
         self.front = Carriage_Node(line_occupied, fractional_position)
-        self.back =  Carriage_Node(line_occupied, fractional_position)
-    
+        self.back  = Carriage_Node(line_occupied, fractional_position)
+
     def get_leader(self, velocity):
         if velocity > 0:
             return self.front
         else:
             return self.back
-    
+
     def get_follower(self,velocity):
         if velocity > 0:
             return self.back

@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-struct State {
-    public State(float _fractionalPosition, LineController _lineOccupied, int _direction){
+public struct CarriageNodeState {
+    public CarriageNodeState(float _fractionalPosition, LineController _lineOccupied, int _direction){
         fractionalPosition = _fractionalPosition;
         lineOccupied = _lineOccupied;
         direction = _direction;
@@ -20,31 +20,28 @@ public class CarriageNode : MonoBehaviour
     private LineController lineOccupied;
     private float fractionalPosition;
     private int direction;
-    private bool isEndsNode;
+    public bool isEndsNode;
 
-    private State previousState;
+    public CarriageNodeState previousState;
 
-    private CarriageNode toFollow; // Temporary
-
-    public void Setup(LineController lineOccupied, float fractionalPosition, CarriageNode tf){
+    public void Setup(LineController lineOccupied, float fractionalPosition){
         this.lineOccupied = lineOccupied;
         this.fractionalPosition = fractionalPosition;
         this.direction = 1; // 1 if the node is traversing segment start -> finish, else -1 or 0
         this.isEndsNode = false;
-        this.toFollow = tf; // Temporary
     }
 
     void SaveState(){
-        previousState = new State(fractionalPosition, lineOccupied, direction);
+        previousState = new CarriageNodeState(fractionalPosition, lineOccupied, direction);
     }
 
-    void UndoStep(){
+    public void UndoStep(){
         fractionalPosition = previousState.fractionalPosition;
         lineOccupied       = previousState.lineOccupied;
         direction          = previousState.direction;
     }
 
-    int Step(float velocity, bool save=false){
+    public int Step(float velocity, bool save=false){
         // Move forward a fixed distance. Returns True on any movement. //
         // Error codes: 0 - success, 1 - failure //
         if (save){ SaveState(); }
@@ -112,7 +109,7 @@ public class CarriageNode : MonoBehaviour
         return 0;
     }
 
-    int Follow(CarriageNode aheadCarriageNode, int carriageLength, float trainVelocity) {
+    public int Follow(CarriageNode aheadCarriageNode, float carriageLength, float trainVelocity) {
         // Error codes: 0 - success, 1 - failure
         float relativeTrainVelocity = trainVelocity; // Initial value, independent of direction
         trainVelocity *= direction; // The velocity in the direction in which the train is treating this segment of track (absolute velocity on segment)
@@ -182,13 +179,13 @@ public class CarriageNode : MonoBehaviour
         }
     }
 
-    void MoveTo(CarriageNode aheadCarriageNode) {
+    public void MoveTo(CarriageNode aheadCarriageNode) {
         lineOccupied       = aheadCarriageNode.lineOccupied;
         fractionalPosition = aheadCarriageNode.fractionalPosition;
         direction          = aheadCarriageNode.direction;
     }
 
-    Vector2 GetPosition() {
+    public Vector2 GetPosition() {
         // Interpolate position of node //
         return lineOccupied.InterpolatePosition(fractionalPosition);
     }
@@ -207,7 +204,7 @@ public class CarriageNode : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float x = Input.GetAxis("Horizontal");
+        /*float x = Input.GetAxis("Horizontal");
         if (toFollow == null){
             Step(x*0.1f);
         }else {
@@ -215,5 +212,6 @@ public class CarriageNode : MonoBehaviour
         }
         Vector2 pos = GetPosition();
         gameObject.transform.position = new Vector3(pos.x,pos.y,1);
+        */
     }
 }
